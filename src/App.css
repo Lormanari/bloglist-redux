@@ -1,3 +1,21 @@
+.error {
+	border: 2px solid #ff0000;
+	border-radius: 5px;
+	color: #ff0000;
+	padding-left: 1rem;
+	padding-right: 1rem;
+	margin-bottom: 1rem;
+}
+
+.success {
+	border: 2px solid green;
+	border-radius: 5px;
+	color: green;
+	padding-left: 1rem;
+	padding-right: 1rem;
+	margin-bottom: 1rem;
+}
+
 .App {
   text-align: center;
 }
