@@ -21,10 +21,13 @@ const App = () => {
 	// const [newBlog, setNewBlog] = useState(initialState)
 
 
+	blogs.sort((a,b) => a.likes - b.likes)
+
 
 	useEffect(() => {
-		blogService.getAll().then(blogs =>
+		blogService.getAll().then(blogs => {
 			setBlogs( blogs )
+		}
 		)
 	}, [])
 
@@ -106,7 +109,7 @@ const App = () => {
 	const addLikes = (id) => {
 		console.log('clicked')
 		const blog = blogs.find(b => b.id === id)
-		const updatedBlog = {...blog, likes: blog.likes + 1, user: blog.user_id }
+		const updatedBlog = {...blog, likes: blog.likes + 1, user: blog.user.id }
 		console.log(updatedBlog)
 
 		blogService
@@ -119,8 +122,15 @@ const App = () => {
 			setTimeout(() => {
 				setErrorMessage(null)
 			}, 5000)
-			setBlogs(blogs.filter(n => n.id !== id))
+			setBlogs(blogs.filter(b => b.id !== id))
 		})
+	}
+	const handleRemove = (name, author, id) => {
+		if (window.confirm(`remove blog "${name}" by ${author}`)) {
+			blogService
+			.remove(id)
+			.then(setBlogs(blogs.filter(b => b.id !== id)))
+		}
 	}
 
 	return (
@@ -130,10 +140,17 @@ const App = () => {
 				loginForm() :
 				<div>
 					<Notification type="success" message={errorMessage} />
-					<p>{user.name} logged-in<button onClick={handleLogout}>logout</button></p>
+					<p>{user.username} logged-in<button onClick={handleLogout}>logout</button></p>
 					{addBlogForm()}
 					{blogs.map(blog => (
-						<Blog key={blog.id} blog={blog} controlLikes={() => addLikes(blog.id)}/>
+
+						<Blog
+							key={blog.id}
+							blog={blog}
+							controlLikes={() => addLikes(blog.id)}
+							isCreator={user.username === blog.user.username ? true : false}
+							handleDelete={() => handleRemove(blog.title, blog.author, blog.id)}
+						/>
 						)
 					)}
 				</div>

@@ -1,6 +1,6 @@
 import React, { useState} from 'react'
 
-const Blog = ({ blog, controlLikes }) => {
+const Blog = ({ blog, controlLikes, isCreator, handleDelete }) => {
 	const [visible, setVisible] = useState(false)
 
 	const hideWhenVisible = { display: visible ? 'none' : '' }
@@ -19,6 +19,8 @@ const Blog = ({ blog, controlLikes }) => {
 		</div>
 		<div style={showWhenVisible}>
 		  	{blog.url}<br></br>likes {blog.likes} <button onClick={controlLikes}>like</button><br></br>{creator}
+			<br></br>
+			{isCreator === true ? <button className="btn-remove" onClick={handleDelete}>remove</button>: ''}
 		</div>
 	  </div>
 	)
