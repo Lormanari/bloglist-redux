@@ -1,5 +1,6 @@
 import React from 'react'
 import Notification from './Notification'
+import PropTypes from 'prop-types'
 
 const LoginForm = ({
 	handleSubmit,
@@ -32,8 +33,16 @@ const LoginForm = ({
 				/>
 			</div>
 			<button type="submit">Login</button>
-	</form>
+		</form>
 	</div>
 )
+
+LoginForm.propTypes = {
+	handleSubmit: PropTypes.func.isRequired,
+	handleUsernameChange: PropTypes.func.isRequired,
+	handlePasswordChange: PropTypes.func.isRequired,
+	username: PropTypes.string.isRequired,
+	password: PropTypes.string.isRequired
+}
 
 export default LoginForm
