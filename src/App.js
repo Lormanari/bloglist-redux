@@ -103,6 +103,26 @@ const App = () => {
 		</Togglable>
 	)
 
+	const addLikes = (id) => {
+		console.log('clicked')
+		const blog = blogs.find(b => b.id === id)
+		const updatedBlog = {...blog, likes: blog.likes + 1, user: blog.user_id }
+		console.log(updatedBlog)
+
+		blogService
+		.update(id, updatedBlog)
+		.then(returnedBlog => {
+			setBlogs(blogs.map(blog => blog.id !== id ? blog : returnedBlog))
+		})
+		.catch(error => {
+			setErrorMessage(`the blog '${blog.title}' was already deleted from server`)
+			setTimeout(() => {
+				setErrorMessage(null)
+			}, 5000)
+			setBlogs(blogs.filter(n => n.id !== id))
+		})
+	}
+
 	return (
 		<div>
 			<h1>blogs</h1>
@@ -113,7 +133,7 @@ const App = () => {
 					<p>{user.name} logged-in<button onClick={handleLogout}>logout</button></p>
 					{addBlogForm()}
 					{blogs.map(blog => (
-						<Blog key={blog.id} blog={blog} />
+						<Blog key={blog.id} blog={blog} controlLikes={() => addLikes(blog.id)}/>
 						)
 					)}
 				</div>
