@@ -16,6 +16,15 @@
 	margin-bottom: 1rem;
 }
 
+.blogItem {
+	border-bottom: 1px solid #555555;
+	padding: 1rem 1rem 0.5rem 1rem;
+}
+
+.blogItem div:first-child {
+	margin-bottom: 0.5rem;
+}
+
 .App {
   text-align: center;
 }

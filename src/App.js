@@ -66,6 +66,20 @@ const App = () => {
 		window.localStorage.clear()
 	}
 
+	const loginForm = () => (
+		<Togglable buttonLabel='login'>
+			<LoginForm
+				handleUsernameChange={({target}) => setUsername(target.value)}
+				handlePasswordChange={({target}) => setPassword(target.value)}
+				username={username}
+				password={password}
+				errormessage={errorMessage}
+				handleSubmit={handleLogin}
+			/>
+		</Togglable>
+	)
+
+
 	const noteFormRef = useRef()
 
 	const addBlog = (blogObject) => {
@@ -83,27 +97,11 @@ const App = () => {
 		})
 	}
 
-	const loginForm = () => (
-		<Togglable buttonLabel='login'>
-			<LoginForm
-				handleUsernameChange={({target}) => setUsername(target.value)}
-				handlePasswordChange={({target}) => setPassword(target.value)}
-				username={username}
-				password={password}
-				errormessage={errorMessage}
-				handleSubmit={handleLogin}
-			/>
-		</Togglable>
-	)
-
-
-
 	const addBlogForm = () => (
-		<Togglable buttonLabel='New blog' ref={noteFormRef}>
+		<Togglable buttonLabel='Create new blog' ref={noteFormRef}>
 			<BlogForm createBlog={addBlog} />
 		</Togglable>
 	)
-
 
 	return (
 		<div>
@@ -114,8 +112,9 @@ const App = () => {
 					<Notification type="success" message={errorMessage} />
 					<p>{user.name} logged-in<button onClick={handleLogout}>logout</button></p>
 					{addBlogForm()}
-					{blogs.map(blog =>
+					{blogs.map(blog => (
 						<Blog key={blog.id} blog={blog} />
+						)
 					)}
 				</div>
 			}
