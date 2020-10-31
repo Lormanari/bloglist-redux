@@ -16,7 +16,7 @@ const Blog = ({ blog, controlLikes, isCreator, handleDelete }) => {
 				{blog.title} {blog.author} <button style={hideWhenVisible} onClick={toggleVisibility}>view</button>
 				<button style={showWhenVisible} onClick={toggleVisibility}>hide</button>
 			</div>
-			<div style={showWhenVisible}>
+			<div style={showWhenVisible} className="blogDetails">
 				{blog.url}<br></br>
 				likes {blog.likes} <button onClick={controlLikes}>like</button><br></br>
 				{blog.user.username === null ? '': blog.user.username}<br></br>
