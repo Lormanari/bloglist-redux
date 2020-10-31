@@ -21,7 +21,7 @@ const App = () => {
 	// const [newBlog, setNewBlog] = useState(initialState)
 
 
-	blogs.sort((a,b) => a.likes - b.likes)
+	blogs.sort((a,b) => b.likes - a.likes )
 
 
 	useEffect(() => {
@@ -138,8 +138,9 @@ const App = () => {
 				loginForm() :
 				<div>
 					<Notification type="success" message={errorMessage} />
-					<p>{user.username} logged-in<button onClick={handleLogout}>logout</button></p>
+					<p>{user.name} logged-in<button onClick={handleLogout}>logout</button></p>
 					{addBlogForm()}
+					<div className="blogs-container">
 					{blogs.map(blog => (
 						<Blog
 							key={blog.id}
@@ -150,6 +151,7 @@ const App = () => {
 						/>
 					)
 					)}
+					</div>
 				</div>
 			}
 		</div>

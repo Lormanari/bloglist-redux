@@ -18,7 +18,7 @@ const Blog = ({ blog, controlLikes, isCreator, handleDelete }) => {
 			</div>
 			<div style={showWhenVisible} className="blogDetails">
 				{blog.url}<br></br>
-				likes {blog.likes} <button onClick={controlLikes}>like</button><br></br>
+				likes <span className='numberOFLikes'>{blog.likes}</span> <button onClick={controlLikes}>like</button><br></br>
 				{blog.user.username === null ? '': blog.user.username}<br></br>
 				{isCreator === true ? <button className="btn-remove" onClick={handleDelete}>remove</button>: ''}
 			</div>
