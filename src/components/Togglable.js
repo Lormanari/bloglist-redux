@@ -1,38 +1,41 @@
-import React, { useState, useImperativeHandle } from 'react'
-import PropTypes from 'prop-types'
+import React, { useImperativeHandle } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { visibilityChange } from '../reducers/visibleReducer'
+import { Button } from '@material-ui/core'
 
 const Togglable = React.forwardRef((props, ref) => {
-	const [visible, setVisible] = useState(false)
+	const dispatch = useDispatch()
+	const visible = useSelector(({visible}) => {
+		return visible
+	})
 
 	const hideWhenVisible = { display: visible ? 'none' : '' }
 	const showWhenVisible = { display: visible ? '' : 'none' }
 
 	const toggleVisibility = () => {
-		setVisible(!visible)
+		dispatch(visibilityChange(visible))
 	}
 
 	useImperativeHandle(ref, () => {
 		return {
-			toggleVisibility
+		toggleVisibility
 		}
 	})
 
 	return (
 		<div>
-			<div style={hideWhenVisible}>
-				<button onClick={toggleVisibility}>{props.buttonLabel}</button>
-			</div>
-			<div style={showWhenVisible}>
-				{props.children}
-				<button onClick={toggleVisibility}>Cancel</button>
-			</div>
+		<div style={hideWhenVisible}>
+			{/* <button onClick={toggleVisibility}>{props.buttonLabel}</button> */}
+			<Button onClick={toggleVisibility} variant="contained" color="primary">{props.buttonLabel}</Button>
+		</div>
+		<div style={showWhenVisible} className="togglableContent">
+			{props.children}
+			{/* <button onClick={toggleVisibility}>cancel</button> */}
+			<Button onClick={toggleVisibility} variant="contained" color="secondary">cancel</Button>
+		</div>
 		</div>
 	)
 })
-
-Togglable.propTypes = {
-	buttonLabel: PropTypes.string.isRequired
-}
 
 Togglable.displayName = 'Togglable'
 

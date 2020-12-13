@@ -1,27 +1,78 @@
-import React, { useState } from 'react'
+import React from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { addLike, remove, addComment } from '../reducers/blogReducer'
+// import { addComment } from '../reducers/commentReducer'
+import { useRouteMatch } from "react-router-dom"
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableContainer,
+	TableRow,
+	Paper,
+	Button,
+	TextField
+} from '@material-ui/core'
 
-const Blog = ({ blog, controlLikes, isCreator, handleDelete }) => {
-	const [visible, setVisible] = useState(false)
+const Blog = () => {
+	const dispatch = useDispatch()
+	const user = useSelector(({user}) => {
+		return user
+	})
+	const blogs = useSelector(({blogs}) => {
+		return blogs
+	})
 
-	const hideWhenVisible = { display: visible ? 'none' : '' }
-	const showWhenVisible = { display: visible ? '' : 'none' }
+	const handleNewComment = (event, id, blog) => {
+		event.preventDefault()
 
-	const toggleVisibility = () => {
-		setVisible(!visible)
+		const comment = event.target.comment.value
+		event.target.comment.value = ''
+
+		dispatch(addComment(id, blog, comment))
+	}
+
+	const match = useRouteMatch('/blogs/:id')
+
+	const blog = match
+	? blogs.find(blog => blog.id === match.params.id)
+	: null
+
+	if (!blog) {
+		return null
 	}
 
 	return (
-		<div className="blogItem">
+
+		<div className='blog'>
 			<div>
-				{blog.title} {blog.author} <button style={hideWhenVisible} onClick={toggleVisibility}>view</button>
-				<button style={showWhenVisible} onClick={toggleVisibility}>hide</button>
+				<h1><i>{blog.title}</i> by {blog.author}</h1>
+
+				<div>{blog.url}</div>
+				<div>likes {blog.likes}
+					<Button onClick={() => dispatch(addLike(blog.id, blog))} variant="contained" color="primary">like</Button>
+				</div>
+				<div>added by {blog.user.name}</div>
+				{user.username===blog.user.username&&<Button onClick={() => dispatch(remove(blog.id, blog))} variant="contained" color="secondary">remove</Button>}
 			</div>
-			<div style={showWhenVisible} className="blogDetails">
-				{blog.url}<br></br>
-				likes <span className='numberOFLikes'>{blog.likes}</span> <button onClick={controlLikes}>like</button><br></br>
-				{blog.user.username === null ? '': blog.user.username}<br></br>
-				{isCreator === true ? <button className="btn-remove" onClick={handleDelete}>remove</button>: ''}
+			<h4>Comments</h4>
+			<div>
+				<form onSubmit={(event)=>handleNewComment(event, blog.id, blog)}>
+					{/* <input
+						id="comment"
+						name="comment"
+					/> */}
+
+					<TextField id='comment' name="comment" label="Comment" />
+
+					{/* <button id="add-comment" type="submit">add commnet</button> */}
+					<Button id="add-comment" type="submit" variant="contained" color="primary">add commnet</Button>
+				</form>
 			</div>
+			<ul>
+				{blog.comments.map((c,index) => <li key={index}>{c}</li>)}
+			</ul>
+
 		</div>
 	)
 }

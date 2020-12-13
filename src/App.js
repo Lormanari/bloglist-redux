@@ -1,160 +1,124 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, {useEffect} from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+
+import Blogs from './components/Blogs'
 import Blog from './components/Blog'
-import Notification from './components/Notification'
-import blogService from './services/blogs'
-import loginService from './services/login'
-import Togglable from './components/Togglable'
-import BlogForm from './components/BlogForm'
+import Users from './components/Users'
+import User from './components/User'
 import LoginForm from './components/LoginForm'
+import Notification from './components/Notification'
+import Togglable from './components/Togglable'
+import NewBlog from './components/NewBlog'
+
+import blogService from './services/blogs'
+
+import storage from './utils/storage'
+import { initializeBlogs } from './reducers/blogReducer'
+import { initializeUsers } from './reducers/usersReducer'
+import { saveUser } from './reducers/userReducer'
+import {
+	Switch,
+	Route,
+	Link,
+} from "react-router-dom"
+
+import {
+	Container,
+	Button,
+	AppBar,
+	Toolbar,
+} from '@material-ui/core'
+
+import styled from 'styled-components'
+
+// const Navigation = styled.div`
+//   background: LightGray;
+//   padding: 1em;
+// `
+// const padding = {
+// 	padding: 5
+// }
 
 const App = () => {
-	const [blogs, setBlogs] = useState([])
-	const [username, setUsername] = useState('')
-	const [password, setPassword] = useState('')
-	const [user, setUser] = useState(null)
-	const [errorMessage, setErrorMessage] = useState(null)
-	// const initialState = {
-	// 	title: '',
-	// 	author: '',
-	// 	url: ''
-	// }
-	// const [newBlog, setNewBlog] = useState(initialState)
+	const blogFormRef = React.createRef()
 
-
-	blogs.sort((a,b) => b.likes - a.likes )
-
+	const dispatch = useDispatch()
+	useEffect(() => {
+		const user = storage.loadUser()
+		if (!user) return;
+		dispatch(saveUser(user))
+		blogService.setToken(user.token)
+	}, [dispatch])
 
 	useEffect(() => {
-		blogService.getAll().then(blogs => {
-			setBlogs( blogs )
-		}
+		dispatch(initializeBlogs())
+		dispatch(initializeUsers())
+	}, [dispatch])
+
+	const handleLogout = () => {
+		dispatch(saveUser({}))
+		storage.logoutUser()
+	}
+
+	const togglevisibility = () => {
+		blogFormRef.current.toggleVisibility()
+	}
+
+	const user = useSelector(({user}) => {
+		return user
+	})
+
+	if ( !Object.keys(user).length ) {
+		return (
+			<Container>
+				<Togglable buttonLabel='login'>
+					<LoginForm />
+				</Togglable>
+			</Container>
 		)
-	}, [])
-
-	useEffect(() => {
-		const loggedUserJSON = window.localStorage.getItem('loggedUser')
-		if(loggedUserJSON) {
-			const user = JSON.parse(loggedUserJSON)
-			setUser(user)
-			blogService.setToken(user.token)
-		}
-	}, [])
-
-	const handleLogin = async (event) => {
-		event.preventDefault()
-
-		try {
-			const user = await loginService.login({
-				username, password,
-			})
-
-			window.localStorage.setItem(
-				'loggedUser', JSON.stringify(user)
-			)
-
-			blogService.setToken(user.token)
-			setUser(user)
-			setUsername('')
-			setPassword('')
-
-		} catch (exception) {
-			setErrorMessage('Wrong credentials')
-			setTimeout(() => {
-				setErrorMessage(null)
-			}, 5000)
-		}
-	}
-	const handleLogout = async () => {
-		setUser(null)
-		window.localStorage.clear()
-	}
-
-	const loginForm = () => (
-		<Togglable buttonLabel='login'>
-			<LoginForm
-				handleUsernameChange={({ target }) => setUsername(target.value)}
-				handlePasswordChange={({ target }) => setPassword(target.value)}
-				username={username}
-				password={password}
-				errormessage={errorMessage}
-				handleSubmit={handleLogin}
-			/>
-		</Togglable>
-	)
-
-
-	const noteFormRef = useRef()
-
-	const addBlog = (blogObject) => {
-		setErrorMessage(`A new blog "${blogObject.title}" by ${blogObject.author} added`)
-		setTimeout(() => {
-			setErrorMessage(null)
-		}, 5000)
-
-		noteFormRef.current.toggleVisibility()
-
-		blogService
-			.create(blogObject)
-			.then(returnedBlog => {
-				setBlogs(blogs.concat(returnedBlog))
-			})
-	}
-
-	const addBlogForm = () => (
-		<Togglable buttonLabel='Create new blog' ref={noteFormRef}>
-			<BlogForm createBlog={addBlog} />
-		</Togglable>
-	)
-
-	const addLikes = (id) => {
-		const blog = blogs.find(b => b.id === id)
-		const updatedBlog = { ...blog, likes: blog.likes + 1, user: blog.user.id }
-
-		blogService
-			.update(id, updatedBlog)
-			.then(returnedBlog => {
-				setBlogs(blogs.map(blog => blog.id !== id ? blog : returnedBlog))
-			})
-			.catch(error => {
-				setErrorMessage(`the blog '${blog.title}' was already deleted from server`)
-				setTimeout(() => {
-					setErrorMessage(null)
-				}, 5000)
-				setBlogs(blogs.filter(b => b.id !== id))
-			})
-	}
-	const handleRemove = (name, author, id) => {
-		if (window.confirm(`remove blog "${name}" by ${author}`)) {
-			blogService
-				.remove(id)
-				.then(setBlogs(blogs.filter(b => b.id !== id)))
-		}
 	}
 
 	return (
-		<div>
-			<h1>blogs</h1>
-			{user === null ?
-				loginForm() :
-				<div>
-					<Notification type="success" message={errorMessage} />
-					<p>{user.name} logged-in<button onClick={handleLogout}>logout</button></p>
-					{addBlogForm()}
-					<div className="blogs-container">
-					{blogs.map(blog => (
-						<Blog
-							key={blog.id}
-							blog={blog}
-							controlLikes={() => addLikes(blog.id)}
-							isCreator={user.username === blog.user.username ? true : false}
-							handleDelete={() => handleRemove(blog.title, blog.author, blog.id)}
-						/>
-					)
-					)}
-					</div>
-				</div>
-			}
-		</div>
+		<Container>
+
+		<AppBar position="static">
+			<Toolbar>
+				<Button color="inherit" component={Link} to="/">
+				blogs
+				</Button>
+				<Button color="inherit" component={Link} to="/users">
+				users
+				</Button>
+				{/* <Link style={padding} to="/"></Link>
+				<Link style={padding} to="/users">users</Link> */}
+				{/* <button onClick={handleLogout}>logout</button> */}
+
+					{user.name} logged in <Button variant="contained" color="default" onClick={handleLogout}>
+					logout
+					</Button>
+
+			</Toolbar>
+		</AppBar>
+		<Switch>
+				<Route path="/blogs/:id">
+					<Blog />
+				</Route>
+				<Route path="/users/:id">
+					<User />
+				</Route>
+				<Route path="/users">
+					<Users />
+				</Route>
+				<Route path="/">
+					<Notification />
+					<h2>Blogs</h2>
+					<Togglable buttonLabel='create new blog' ref={blogFormRef}>
+						<NewBlog toggleVisibility={togglevisibility}/>
+					</Togglable>
+					<Blogs />
+				</Route>
+			</Switch>
+		</Container>
 	)
 }
 
